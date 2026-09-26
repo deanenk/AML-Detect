@@ -1,0 +1,22 @@
+{
+  "confusion_matrix": {
+    "tp": 115,
+    "tn": 2155,
+    "fp": 345,
+    "fn": 2385
+  },
+  "accuracy": 0.454,
+  "precision": 0.25,
+  "recall": 0.046,
+  "f1": 0.0777027027027027,
+  "roc_auc": 0.62488832,
+  "pr_auc": 0.5255158094809411,
+  "false_positive_rate": 0.138,
+  "false_negative_rate": 0.954,
+  "detection_delay": 2.34,
+  "inference_time_ms": 1.5314487934112548,
+  "total_time_seconds": 7.66722297668457,
+  "total_samples": 5000,
+  "normal_samples": 2500,
+  "attack_samples": 2500
+}

@@ -1,0 +1,268 @@
+# preprocess.py
+# Data preprocessing for SWaT dataset
+# Chronological split: NO DATA LEAKAGE
+
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+import os
+import pickle
+from datetime import datetime
+
+def load_raw_data(raw_path="data/raw/"):
+    """
+    Load SWaT dataset from raw folder.
+    Assumes normal.csv and attack.csv are in raw_path.
+    """
+    print("📂 Loading SWaT dataset...")
+    
+    # Load normal and attack data
+    normal_df = pd.read_csv(os.path.join(raw_path, "normal.csv"))
+    attack_df = pd.read_csv(os.path.join(raw_path, "attack.csv"))
+    
+    print(f"   Normal data: {normal_df.shape[0]} rows, {normal_df.shape[1]} columns")
+    print(f"   Attack data: {attack_df.shape[0]} rows, {attack_df.shape[1]} columns")
+    
+    return normal_df, attack_df
+
+def find_timestamp_column(df):
+    """
+    Find timestamp column by checking common names.
+    Handles cases with leading/trailing spaces.
+    """
+    for col in df.columns:
+        col_clean = col.strip()
+        if col_clean.lower() in ['timestamp', 'time', 'date', 'datetime']:
+            return col
+    return None
+
+def combine_and_label(normal_df, attack_df):
+    """
+    Combine normal and attack data with labels.
+    Normal = 0, Attack = 1
+    """
+    print("📊 Combining and labelling data...")
+    
+    # Add label column
+    normal_df['label'] = 0  # Normal operation
+    attack_df['label'] = 1  # Attack
+    
+    # Combine
+    combined_df = pd.concat([normal_df, attack_df], ignore_index=True)
+    
+    # Find timestamp column
+    timestamp_col = find_timestamp_column(combined_df)
+    
+    if timestamp_col is not None:
+        print(f"   Found timestamp column: '{timestamp_col}'")
+        # Clean column name for easier handling
+        clean_name = timestamp_col.strip()
+        if timestamp_col != clean_name:
+            combined_df.rename(columns={timestamp_col: clean_name}, inplace=True)
+            timestamp_col = clean_name
+        
+        # Strip whitespace from timestamp values
+        combined_df[timestamp_col] = combined_df[timestamp_col].str.strip()
+        
+        # Parse dates with correct format: DD/MM/YYYY HH:MM:SS AM/PM
+        combined_df[timestamp_col] = pd.to_datetime(
+            combined_df[timestamp_col],
+            format='%d/%m/%Y %I:%M:%S %p',
+            dayfirst=True
+        )
+        combined_df = combined_df.sort_values(timestamp_col).reset_index(drop=True)
+        print(f"   Combined: {combined_df.shape[0]} rows, {combined_df.shape[1]} columns")
+        print(f"   Date range: {combined_df[timestamp_col].min()} to {combined_df[timestamp_col].max()}")
+    else:
+        print("   ⚠️  No timestamp column found - using index order")
+        timestamp_col = None
+    
+    return combined_df, timestamp_col
+
+def get_numeric_columns(df, exclude_cols):
+    """
+    Get only numeric columns from DataFrame, excluding specified columns.
+    """
+    feature_cols = [col for col in df.columns if col not in exclude_cols]
+    print(f"   Features before cleaning: {len(feature_cols)}")
+    
+    # Keep only numeric columns
+    numeric_cols = []
+    for col in feature_cols:
+        try:
+            # Test if column can be converted to numeric
+            pd.to_numeric(df[col].iloc[:100], errors='raise')
+            numeric_cols.append(col)
+        except:
+            print(f"   Skipping non-numeric column: '{col}'")
+            continue
+    
+    print(f"   Features after cleaning: {len(numeric_cols)}")
+    return numeric_cols
+
+def chronological_split(df, timestamp_col, train_days=7):
+    """
+    Split data chronologically.
+    Train: First 7 days (normal operation)
+    Test: Remaining 4 days (contains attacks)
+    
+    CRITICAL: NO DATA LEAKAGE - test data MUST be after train data.
+    """
+    print("✂️ Splitting chronologically...")
+    
+    if timestamp_col is not None and timestamp_col in df.columns:
+        # Get date range
+        min_date = df[timestamp_col].min()
+        train_cutoff = min_date + pd.Timedelta(days=train_days)
+        
+        train_mask = df[timestamp_col] < train_cutoff
+        test_mask = df[timestamp_col] >= train_cutoff
+        
+        train_df = df[train_mask].copy()
+        test_df = df[test_mask].copy()
+        
+        # Further split train into train/validation (80/20 chronological)
+        val_cutoff = train_df[timestamp_col].min() + pd.Timedelta(days=train_days * 0.8)
+        val_mask = train_df[timestamp_col] >= val_cutoff
+        
+        # Get training data (before validation cutoff)
+        train_df_full = train_df[~val_mask].copy()
+        val_df = train_df[val_mask].copy()
+        
+        print(f"   Train data: {train_df_full.shape[0]} rows")
+        print(f"   Validation data: {val_df.shape[0]} rows")
+        print(f"   Test data: {test_df.shape[0]} rows")
+        print(f"   Train date range: {train_df_full[timestamp_col].min()} to {train_df_full[timestamp_col].max()}")
+        print(f"   Validation date range: {val_df[timestamp_col].min()} to {val_df[timestamp_col].max()}")
+        print(f"   Test date range: {test_df[timestamp_col].min()} to {test_df[timestamp_col].max()}")
+        
+        # Verify no leakage: test dates MUST be after train dates
+        if len(train_df_full) > 0 and len(val_df) > 0 and len(test_df) > 0:
+            assert train_df_full[timestamp_col].max() < val_df[timestamp_col].min(), "❌ DATA LEAKAGE: Validation starts before train ends"
+            assert val_df[timestamp_col].max() < test_df[timestamp_col].min(), "❌ DATA LEAKAGE: Test starts before validation ends"
+            print("   ✅ No data leakage confirmed!")
+        
+        return train_df_full, val_df, test_df
+    
+    else:
+        # Fallback: split by index order
+        print("   ⚠️  No timestamp column - splitting by index order")
+        train_size = int(0.7 * len(df))
+        val_size = int(0.1 * len(df))
+        
+        train_df = df[:train_size].copy()
+        val_df = df[train_size:train_size+val_size].copy()
+        test_df = df[train_size+val_size:].copy()
+        
+        return train_df, val_df, test_df
+
+def preprocess_swat(raw_path="data/raw/", processed_path="data/processed/", train_days=7):
+    """
+    Complete preprocessing pipeline for SWaT dataset.
+    """
+    print("="*60)
+    print("🔧 SWaT Preprocessing Pipeline")
+    print("="*60)
+    
+    # 1. Load raw data
+    normal_df, attack_df = load_raw_data(raw_path)
+    
+    # 2. Combine and label
+    combined_df, timestamp_col = combine_and_label(normal_df, attack_df)
+    
+    # 3. Chronological split
+    train_df, val_df, test_df = chronological_split(combined_df, timestamp_col, train_days)
+    
+    # 4. Separate features and labels
+    exclude_cols = ['label']
+    if timestamp_col is not None:
+        exclude_cols.append(timestamp_col)
+    
+    # Get only numeric columns
+    feature_cols = get_numeric_columns(combined_df, exclude_cols)
+    
+    X_train = train_df[feature_cols].values.astype(float)
+    y_train = train_df['label'].values
+    
+    X_val = val_df[feature_cols].values.astype(float)
+    y_val = val_df['label'].values
+    
+    X_test = test_df[feature_cols].values.astype(float)
+    y_test = test_df['label'].values
+    
+    # 5. Handle NaN values (replace with 0)
+    print("   Checking for NaN/Inf values...")
+    nan_train = np.isnan(X_train).sum()
+    nan_val = np.isnan(X_val).sum()
+    nan_test = np.isnan(X_test).sum()
+    print(f"   X_train NaN count: {nan_train}")
+    print(f"   X_val NaN count: {nan_val}")
+    print(f"   X_test NaN count: {nan_test}")
+    
+    if nan_train > 0 or nan_val > 0 or nan_test > 0:
+        print("   Replacing NaN with 0...")
+        X_train = np.nan_to_num(X_train)
+        X_val = np.nan_to_num(X_val)
+        X_test = np.nan_to_num(X_test)
+    
+    # 6. Scale features (FIT ON TRAINING ONLY!)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
+    X_test_scaled = scaler.transform(X_test)
+    
+    print(f"\n📊 Final dataset shapes:")
+    print(f"   X_train: {X_train_scaled.shape}, y_train: {y_train.shape}")
+    print(f"   X_val: {X_val_scaled.shape}, y_val: {y_val.shape}")
+    print(f"   X_test: {X_test_scaled.shape}, y_test: {y_test.shape}")
+    
+    # 7. Save processed data
+    os.makedirs(processed_path, exist_ok=True)
+    
+    np.save(os.path.join(processed_path, "X_train.npy"), X_train_scaled)
+    np.save(os.path.join(processed_path, "X_val.npy"), X_val_scaled)
+    np.save(os.path.join(processed_path, "X_test.npy"), X_test_scaled)
+    np.save(os.path.join(processed_path, "y_train.npy"), y_train)
+    np.save(os.path.join(processed_path, "y_val.npy"), y_val)
+    np.save(os.path.join(processed_path, "y_test.npy"), y_test)
+    
+    # Save scaler
+    with open(os.path.join(processed_path, "scaler.pkl"), 'wb') as f:
+        pickle.dump(scaler, f)
+    
+    # Save feature columns
+    with open(os.path.join(processed_path, "feature_columns.txt"), 'w') as f:
+        for col in feature_cols:
+            f.write(f"{col}\n")
+    
+    # Save split info
+    with open(os.path.join(processed_path, "split_info.txt"), 'w') as f:
+        f.write("SWaT Dataset Chronological Split\n")
+        f.write("="*50 + "\n")
+        f.write(f"Total samples: {len(combined_df)}\n")
+        f.write(f"Features: {len(feature_cols)}\n")
+        f.write("-"*50 + "\n")
+        f.write(f"Train: {X_train.shape[0]} samples\n")
+        f.write(f"  Normal: {np.sum(y_train == 0)}, Attack: {np.sum(y_train == 1)}\n")
+        if timestamp_col:
+            f.write(f"  Date range: {train_df[timestamp_col].min()} to {train_df[timestamp_col].max()}\n")
+        f.write(f"Validation: {X_val.shape[0]} samples\n")
+        f.write(f"  Normal: {np.sum(y_val == 0)}, Attack: {np.sum(y_val == 1)}\n")
+        if timestamp_col:
+            f.write(f"  Date range: {val_df[timestamp_col].min()} to {val_df[timestamp_col].max()}\n")
+        f.write(f"Test: {X_test.shape[0]} samples\n")
+        f.write(f"  Normal: {np.sum(y_test == 0)}, Attack: {np.sum(y_test == 1)}\n")
+        if timestamp_col:
+            f.write(f"  Date range: {test_df[timestamp_col].min()} to {test_df[timestamp_col].max()}\n")
+        f.write("\n✅ NO DATA LEAKAGE: Test dates are after train dates\n")
+    
+    print("\n✅ Preprocessing complete!")
+    print(f"   Processed data saved to: {processed_path}")
+    print("="*60)
+    
+    return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test
+
+if __name__ == "__main__":
+    # Run preprocessing
+    print("🚀 Starting SWaT preprocessing...")
+    X_train, X_val, X_test, y_train, y_val, y_test = preprocess_swat()

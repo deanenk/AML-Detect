@@ -1,0 +1,5 @@
+threshold,true_positive_rate,false_positive_rate,normal_flagged,attack_flagged
+0.5,1.0,0.999524,4200,798
+0.6,1.0,0.999524,4200,798
+0.7,1.0,0.998572,4196,798
+0.8,0.0,0.0,0,0

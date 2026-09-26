@@ -1,0 +1,13 @@
+Table 4.5: Classification Performance on Held-Out Test Data
+============================================================
+Metric                | Value
+----------------------|-------
+Precision             | 0.2500
+Recall                | 0.0460
+F1-Score              | 0.0777
+ROC-AUC               | 0.6249
+PR-AUC                | 0.5255
+False Positive Rate   | 0.1380
+False Negative Rate   | 0.9540
+Detection Delay       | 2.34 seconds
+Inference Time        | 1.53 ms

@@ -1,0 +1,5 @@
+epsilon,clean_accuracy,adversarial_accuracy,attack_success_rate,attack_success_count,robust_samples,total_samples
+0.01,0.874,0.874,0.0,0,437,500
+0.03,0.874,0.874,0.0,0,437,500
+0.05,0.874,0.874,0.0,0,437,500
+0.1,0.874,0.872,0.004577,2,436,500

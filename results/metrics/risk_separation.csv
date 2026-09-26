@@ -1,0 +1,8 @@
+metric,value
+auc,0.5010709186101856
+cohens_d,0.04557492974086882
+ks_statistic,0.002141837220371252
+normal_mean,0.7497203712517848
+attack_mean,0.75
+normal_std,0.00867702419737821
+attack_std,0.0

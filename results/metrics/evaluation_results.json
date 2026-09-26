@@ -1,0 +1,242 @@
+{
+  "balanced_sample": {
+    "seed": 42,
+    "normal": 2500,
+    "attack": 2500,
+    "metrics": {
+      "accuracy": 0.8216,
+      "precision": 0.8109048723897911,
+      "recall": 0.8388,
+      "f1": 0.8246165945733386,
+      "roc_auc": 0.86091952,
+      "pr_auc": 0.8525534906722047,
+      "false_positive_rate": 0.1956,
+      "false_negative_rate": 0.1612,
+      "tp": 2097,
+      "tn": 2011,
+      "fp": 489,
+      "fn": 403,
+      "total_samples": 5000
+    }
+  },
+  "imbalanced_subset": {
+    "sample_size": 20000,
+    "normal": 16749,
+    "attack": 3251,
+    "metrics": {
+      "accuracy": 0.81185,
+      "precision": 0.4577697129660178,
+      "recall": 0.853583512765303,
+      "f1": 0.5959411575217438,
+      "roc_auc": 0.8687156501940396,
+      "pr_auc": 0.5924442628556399,
+      "false_positive_rate": 0.19625052241924892,
+      "false_negative_rate": 0.14641648723469702,
+      "tp": 2775,
+      "tn": 13462,
+      "fp": 3287,
+      "fn": 476,
+      "total_samples": 20000
+    }
+  },
+  "baselines": {
+    "majority_class_accuracy": 0.5,
+    "random_roc_auc": 0.5,
+    "random_pr_auc": 0.5
+  },
+  "confidence_intervals": {
+    "precision": {
+      "lower": 0.7954274373118264,
+      "upper": 0.8268121536780031
+    },
+    "recall": {
+      "lower": 0.8242322166767754,
+      "upper": 0.8527635751423065
+    },
+    "f1": {
+      "lower": 0.8138868343195266,
+      "upper": 0.8360250880309416
+    },
+    "roc_auc": {
+      "lower": 0.8483967834289936,
+      "upper": 0.8724299166553265
+    },
+    "pr_auc": {
+      "lower": 0.8351804260638938,
+      "upper": 0.8713633578556103
+    }
+  },
+  "per_class": [
+    {
+      "class": "Normal",
+      "precision": 0.833057,
+      "recall": 0.8044,
+      "f1": 0.818478,
+      "support": 2500
+    },
+    {
+      "class": "Attack",
+      "precision": 0.810905,
+      "recall": 0.8388,
+      "f1": 0.824617,
+      "support": 2500
+    }
+  ],
+  "threshold_sweep": [
+    {
+      "threshold": 0.1,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.666667
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.666667
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.494132,
+      "recall": 0.9768,
+      "f1": 0.656275
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.733333,
+      "recall": 0.88,
+      "f1": 0.8
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.810905,
+      "recall": 0.8388,
+      "f1": 0.824617
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.83522,
+      "recall": 0.7968,
+      "f1": 0.815558
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  ],
+  "calibration": [
+    {
+      "bin_lower": 0.0,
+      "bin_upper": 0.1,
+      "mean_predicted": 0.0,
+      "observed_frequency": 0.0,
+      "count": 0
+    },
+    {
+      "bin_lower": 0.1,
+      "bin_upper": 0.2,
+      "mean_predicted": 0.0,
+      "observed_frequency": 0.0,
+      "count": 0
+    },
+    {
+      "bin_lower": 0.2,
+      "bin_upper": 0.3,
+      "mean_predicted": 0.294193,
+      "observed_frequency": 1.0,
+      "count": 58
+    },
+    {
+      "bin_lower": 0.3,
+      "bin_upper": 0.4,
+      "mean_predicted": 0.329825,
+      "observed_frequency": 0.124614,
+      "count": 1942
+    },
+    {
+      "bin_lower": 0.4,
+      "bin_upper": 0.5,
+      "mean_predicted": 0.461701,
+      "observed_frequency": 0.248792,
+      "count": 414
+    },
+    {
+      "bin_lower": 0.5,
+      "bin_upper": 0.6,
+      "mean_predicted": 0.542743,
+      "observed_frequency": 0.522388,
+      "count": 201
+    },
+    {
+      "bin_lower": 0.6,
+      "bin_upper": 0.7,
+      "mean_predicted": 0.653673,
+      "observed_frequency": 0.83522,
+      "count": 2385
+    },
+    {
+      "bin_lower": 0.7,
+      "bin_upper": 0.8,
+      "mean_predicted": 0.0,
+      "observed_frequency": 0.0,
+      "count": 0
+    },
+    {
+      "bin_lower": 0.8,
+      "bin_upper": 0.9,
+      "mean_predicted": 0.0,
+      "observed_frequency": 0.0,
+      "count": 0
+    },
+    {
+      "bin_lower": 0.9,
+      "bin_upper": 1.0,
+      "mean_predicted": 0.0,
+      "observed_frequency": 0.0,
+      "count": 0
+    }
+  ],
+  "ensemble_stats_by_class": [
+    {
+      "statistic": "mean",
+      "normal": 0.402347,
+      "attack": 0.604385,
+      "difference": 0.202038
+    },
+    {
+      "statistic": "std",
+      "normal": 0.115003,
+      "attack": 0.115434,
+      "difference": 0.000431
+    }
+  ],
+  "timings": {
+    "balanced_total_seconds": 2.3008,
+    "balanced_inference_ms": 0.4602,
+    "imbalanced_total_seconds": 9.0956,
+    "imbalanced_inference_ms": 0.4548
+  },
+  "detection_delay": {
+    "measured": false,
+    "reason": "The Kaggle derivative does not preserve attack onset timestamps. Detection delay is not measured."
+  },
+  "notes": [
+    "Balanced sample changes class prevalence to 50%. Precision, F1 and PR-AUC are prevalence-sensitive.",
+    "Imbalanced metrics are computed on a 20,000-sample subset of the full test set, not the full 341,919 rows.",
+    "The artefact is a research prototype. Current performance does not support deployment."
+  ]
+}

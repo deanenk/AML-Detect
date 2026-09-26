@@ -1,0 +1,15 @@
+metric,value
+evaluation_set,imbalanced_subset_20000
+accuracy,0.81185
+precision,0.45777
+recall,0.853584
+f1,0.595941
+roc_auc,0.868716
+pr_auc,0.592444
+false_positive_rate,0.196251
+false_negative_rate,0.146416
+tp,2775.0
+tn,13462.0
+fp,3287.0
+fn,476.0
+total_samples,20000.0

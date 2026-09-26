@@ -1,0 +1,10 @@
+SWaT Dataset Chronological Split
+==================================================
+Train: 965880 samples
+  Normal: 965880, Attack: 0
+Validation: 133920 samples
+  Normal: 127076, Attack: 6844
+Test: 341919 samples
+  Normal: 294142, Attack: 47777
+Features: 51
+Timestamp column: Timestamp

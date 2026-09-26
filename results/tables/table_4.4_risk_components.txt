@@ -1,0 +1,6 @@
+Table 4.4: Risk Score Components by Class
+============================================================
+Component          | Normal Mean | Attack Mean | Difference
+-------------------|-------------|-------------|-----------
+Ensemble Score     | 0.4312 | 0.4345 | 0.0033
+Risk Score         | 0.7129 | 0.7150 | 0.0022

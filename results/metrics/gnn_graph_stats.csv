@@ -1,0 +1,8 @@
+statistic,value
+nodes,51
+edges,127
+edge_density,0.099608
+mean_degree,4.9804
+max_degree,12
+min_degree,0
+isolated_nodes,12

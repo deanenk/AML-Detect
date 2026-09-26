@@ -1,0 +1,15 @@
+torch
+torch-geometric
+spade
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+joblib
+pyyaml
+fastapi
+uvicorn
+fastapi
+uvicorn
+python-multipart
