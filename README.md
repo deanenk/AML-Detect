@@ -20,7 +20,7 @@ The system is evaluated on the **Secure Water Treatment (SWaT)** dataset — spe
 
 ---
 
-## 🔬 Key Findings (Honest Summary)
+## 🔬 Key Findings (Summary)
 
 | Component | Result | Interpretation |
 |---|---|---|
